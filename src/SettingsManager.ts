@@ -13,6 +13,7 @@ export interface PocketSettings {
   "item-note-template-with-templater"?: boolean;
   "item-notes-folder"?: string;
   "item-note-ignore-tags"?: string[];
+  "item-note-filename-pattern"?: string;
 
   "multi-word-tag-converter"?: MultiWordTagConversion;
   "pocket-sync-tag"?: string;
@@ -32,6 +33,7 @@ export const DEFAULT_POCKET_SETTINGS: PocketSettings = {
 
   "item-note-template-with-templater": false,
   'item-note-ignore-tags': [],
+  "item-note-filename-pattern": '{{title}}',
 
   "upload-allow-tags": [],
 };

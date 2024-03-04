@@ -283,6 +283,26 @@ const addItemNoteIgnoreTagsSetting = (
     });
 }
 
+const addItemNoteFilenamePatternSetting = (
+  settingsManager: SettingsManager,
+  containerEl: HTMLElement
+) => {
+  new Setting(containerEl)
+    .setName("Item note filename pattern")
+    .setDesc("Specify the pattern to use when creating item notes, available variables: {{title}} {{item_id}}")
+    .addText((text) => {
+      text.setPlaceholder(DEFAULT_POCKET_SETTINGS["item-note-filename-pattern"]);
+      text.setValue(settingsManager.getSetting("item-note-filename-pattern"));
+      text.onChange(async (newValue) => {
+        if (newValue && newValue.length == 0) {
+          newValue = null
+        }
+
+        await settingsManager.updateSetting("item-note-filename-pattern", newValue);
+      });
+    });
+}
+
 const CUSTOM_POCKET_API_URL_CTA = "Custom Pocket API URL";
 const CUSTOM_POCKET_API_URL_DESC = `Use a custom Pocket API URL. This is an advanced setting and should only be used if
 you know what you are doing.`;
@@ -421,6 +441,7 @@ export class PocketSettingTab extends PluginSettingTab {
     addItemNoteTemplateWithTemplaterSetting(this.settingsManager, containerEl);
     addFrontMatterURLKeySetting(this.settingsManager, containerEl);
     addItemNoteIgnoreTagsSetting(this.settingsManager, containerEl);
+    addItemNoteFilenamePatternSetting(this.settingsManager, containerEl);
 
     containerEl.createEl('h2', { text: HEADING_UPLOAD_DATA });
     addUploadAllowTagsSetting(this.settingsManager, containerEl);
