@@ -200,6 +200,15 @@ const transformStatus = (status:number) => {
 const normalizeExcerpt = (excerpt: String) =>
   `${excerpt.replace(/---./g, "")}`.replace(/\r?\n|\r/g, "\n    ");
 
+export const buildTagNormalizer = (settingsManager: SettingsManager, addHashtag: boolean) => {
+  const multiWordTagConversion = settingsManager.getSetting("multi-word-tag-converter")
+
+  return getTagNormalizer({
+    multiWordTagConversion: multiWordTagConversion,
+    addHashtag: addHashtag,
+  })
+}
+
 const generateInitialItemNoteContents = (
   templateContents: TemplateContents,
   pocketItem: SavedPocketItem,
@@ -207,16 +216,9 @@ const generateInitialItemNoteContents = (
 ): string => {
   type SubstitutionFn = (item: SavedPocketItem) => string;
 
-  const multiWordTagConversion = settingsManager.getSetting(
-    "multi-word-tag-converter"
-  )
-
   const hashtagSubstitutor = (addHashtag: boolean) => (tags: PocketTags) =>
     tagsToNoteContent(
-      getTagNormalizer({
-        multiWordTagConversion: multiWordTagConversion,
-        addHashtag: addHashtag,
-      }),
+      buildTagNormalizer(settingsManager, addHashtag),
       tags
     );
 

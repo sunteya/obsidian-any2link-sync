@@ -100,6 +100,9 @@ const addClearLocalPocketDataButton = (
       });
     });
 
+
+const HEADING_ITEM_NOTE = "Pocket item note settings";
+
 const SET_ITEM_NOTE_TEMPLATE_CTA = "Pocket item note template file location";
 
 const addItemNoteTemplateSetting = (
@@ -263,6 +266,23 @@ const addFrontMatterURLKeySetting = (
     });
 };
 
+const addItemNoteIgnoreTagsSetting = (
+  settingsManager: SettingsManager,
+  containerEl: HTMLElement
+) => {
+  new Setting(containerEl)
+    .setName("Ignore item tags")
+    .setDesc("Specify a list of tags to ignore when creating item notes")
+    .addText((text) => {
+      text.setPlaceholder("Specify a list of tags to ignore");
+      text.setValue(settingsManager.getSetting("item-note-ignore-tags").join(", "));
+      text.onChange(async (newValue) => {
+        const newTags = newValue.split(",").map(it => it.trim()).filter(it => it.length > 0)
+        await settingsManager.updateSetting("item-note-ignore-tags", newTags);
+      });
+    });
+}
+
 const CUSTOM_POCKET_API_URL_CTA = "Custom Pocket API URL";
 const CUSTOM_POCKET_API_URL_DESC = `Use a custom Pocket API URL. This is an advanced setting and should only be used if
 you know what you are doing.`;
@@ -287,7 +307,7 @@ const addCustomPocketAPIURLSetting = (
 }
 
 
-const HEADING_UPLOAD_DATA = "Upload data to pocket";
+const HEADING_UPLOAD_DATA = "Upload data to pocket settings";
 
 const UPLOAD_ALLOW_TAGS_CTA = "Upload allow tags";
 const UPLOAD_ALLOW_TAGS_DESC = `Specify the allowed list of tags, multiple tags separated by commas.
@@ -388,16 +408,19 @@ export class PocketSettingTab extends PluginSettingTab {
     containerEl.empty();
     addAuthButton(this.plugin, containerEl);
     addLogoutButton(this.plugin, containerEl);
-    addCreateItemNotesOnSyncOption(this.settingsManager, containerEl);
     addSyncButton(this.plugin, containerEl);
     addClearLocalPocketDataButton(this.plugin, containerEl);
     addMultiWordTagConverterSetting(this.settingsManager, containerEl);
     addPocketSyncTagSetting(this.settingsManager, containerEl);
+    addCustomPocketAPIURLSetting(this.settingsManager, containerEl);
+
+    containerEl.createEl('h2', { text: HEADING_ITEM_NOTE });
+    addCreateItemNotesOnSyncOption(this.settingsManager, containerEl);
     addItemNotesLocationSetting(this.settingsManager, containerEl);
     addItemNoteTemplateSetting(this.settingsManager, containerEl);
     addItemNoteTemplateWithTemplaterSetting(this.settingsManager, containerEl);
     addFrontMatterURLKeySetting(this.settingsManager, containerEl);
-    addCustomPocketAPIURLSetting(this.settingsManager, containerEl);
+    addItemNoteIgnoreTagsSetting(this.settingsManager, containerEl);
 
     containerEl.createEl('h2', { text: HEADING_UPLOAD_DATA });
     addUploadAllowTagsSetting(this.settingsManager, containerEl);
