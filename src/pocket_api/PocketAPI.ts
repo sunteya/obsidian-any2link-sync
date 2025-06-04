@@ -30,7 +30,6 @@ export type UpdateTimestamp = number;
 
 export type AccessTokenResponse = {
   accessToken: AccessToken;
-  username: Username;
 };
 
 var storedRequestToken: RequestToken | null = null;

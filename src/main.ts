@@ -305,21 +305,17 @@ export default class PocketSync extends Plugin {
         log.info(`Not authenticated to Pocket`);
       }
       this.pocketAuthenticated = !!accessInfo;
-      this.pocketUsername = accessInfo?.username;
+      this.pocketUsername = "dummy";
     })();
 
     this.registerObsidianProtocolHandler(
       OBSIDIAN_AUTH_PROTOCOL_ACTION,
       async (params) => {
         const accessInfo = await this.pocketAPI.getAccessToken();
-        if (!accessInfo.username) {
-          throw new Error("Unexpected null username from Pocket auth");
-        }
-
         storePocketAccessInfo(this, accessInfo);
         this.pocketAuthenticated = true;
-        this.pocketUsername = accessInfo.username;
-        new Notice(`Logged in to Pocket as ${this.pocketUsername}`);
+        this.pocketUsername = "dummy";
+        new Notice(`Logged in to Pocket as dummy`);
       }
     );
 

@@ -7,6 +7,8 @@ import {
   clearPocketAccessInfo,
   pocketAccessInfoExists,
   setupAuth,
+  storePocketAccessInfo,
+  loadPocketAccessInfo,
 } from "../pocket_api/PocketAuth";
 import { FolderSuggest } from "src/vendor/obsidian-periodic-notes/file-suggest"
 
@@ -16,16 +18,46 @@ const styles = stylesheet`
   }
 `;
 
-const CONNECT_POCKET_CTA = "Connect your Pocket account";
-
-const addAuthButton = (plugin: PocketSync, containerEl: HTMLElement) =>
-  new Setting(containerEl)
-    .setName("Pocket authorization")
-    .setDesc(CONNECT_POCKET_CTA)
-    .addButton((button) => {
-      button.setButtonText(CONNECT_POCKET_CTA);
-      button.onClick(setupAuth(plugin.pocketAPI));
+const addAccessTokenSetting = (plugin: PocketSync, containerEl: HTMLElement) => {
+  const setting = new Setting(containerEl)
+    .setName("Set access key")
+    .setDesc("Set the access key for the any2.link")
+    .addText(async (text) => {
+      text.setPlaceholder("Enter your access key");
+      text.inputEl.type = "password";
+      text.inputEl.style.width = "100%";
+      
+      const accessInfo = await loadPocketAccessInfo(plugin);
+      if (accessInfo && accessInfo.accessToken) {
+        text.setValue(accessInfo.accessToken);
+      }
+      
+      text.onChange(async (newValue) => {
+        if (newValue.length > 0) {
+          await storePocketAccessInfo(plugin, { accessToken: newValue });
+          new Notice("Access token saved");
+          plugin.pocketAuthenticated = true;
+        }
+      });
+    })
+    .addExtraButton((button) => {
+      button.setIcon("eye-off")
+        .setTooltip("Toggle visibility")
+        .onClick(() => {
+          const inputEl = setting.controlEl.querySelector("input");
+          if (inputEl?.type === "password") {
+            inputEl.type = "text";
+            button.setIcon("eye");
+          } else {
+            inputEl.type = "password";
+            button.setIcon("eye-off");
+          }
+        });
     });
+  
+  setting.controlEl.style.flexGrow = "1";
+  return setting;
+};
 
 const SYNC_POCKET_CTA = "Sync Pocket items";
 
@@ -57,28 +89,6 @@ const addCreateItemNotesOnSyncOption = (
       toggle.onChange((value) =>
         settingsManager.updateSetting("create-item-notes-on-sync", value)
       );
-    });
-
-const LOG_OUT_OF_POCKET_CTA = "Disconnect your Pocket account";
-
-const addLogoutButton = (plugin: PocketSync, containerEl: HTMLElement) =>
-  new Setting(containerEl)
-    .setName(LOG_OUT_OF_POCKET_CTA)
-    .setDesc("Disconnects Obsidian from Pocket")
-    .addButton((button) => {
-      button.setButtonText(LOG_OUT_OF_POCKET_CTA);
-      button.onClick(async () => {
-        if (await pocketAccessInfoExists(plugin)) {
-          log.debug("Disconnecting from Pocket by clearing Pocket access info");
-          clearPocketAccessInfo(plugin);
-          new Notice("Disconnected from Pocket");
-        } else {
-          new Notice("Already logged out of Pocket, skipping");
-        }
-      });
-
-      plugin.pocketAuthenticated = false;
-      plugin.pocketUsername = null;
     });
 
 const CLEAR_LOCAL_POCKET_DATA_CTA = "Clear locally-stored Pocket data";
@@ -426,8 +436,7 @@ export class PocketSettingTab extends PluginSettingTab {
   display(): void {
     let { containerEl } = this;
     containerEl.empty();
-    addAuthButton(this.plugin, containerEl);
-    addLogoutButton(this.plugin, containerEl);
+    addAccessTokenSetting(this.plugin, containerEl);
     addSyncButton(this.plugin, containerEl);
     addClearLocalPocketDataButton(this.plugin, containerEl);
     addMultiWordTagConverterSetting(this.settingsManager, containerEl);

@@ -13,7 +13,7 @@ export const doPocketSync = async (
 ) => {
   const lastUpdateTimestamp = await metadataStore.getLastUpdateTimestamp();
 
-  new Notice(`Fetching Pocket updates for ${accessInfo.username}`);
+  new Notice(`Fetching Pocket updates for dummy`);
 
   const getPocketItemsResponse = await pocketAPI.getPocketItems(
     accessInfo.accessToken,
