@@ -12,6 +12,9 @@ export interface PocketSettings {
   "item-note-template"?: string;
   "item-note-template-with-templater"?: boolean;
   "item-notes-folder"?: string;
+  "item-note-ignore-tags"?: string[];
+  "item-note-filename-pattern"?: string;
+
   "multi-word-tag-converter"?: MultiWordTagConversion;
   "pocket-sync-tag"?: string;
   "frontmatter-url-key"?: string;
@@ -27,7 +30,10 @@ export const DEFAULT_POCKET_SETTINGS: PocketSettings = {
   "frontmatter-url-key": "URL",
   "create-item-notes-on-sync": true,
   "custom-pocket-api-url": "https://getpocket.com",
+
   "item-note-template-with-templater": false,
+  'item-note-ignore-tags': [],
+  "item-note-filename-pattern": '{{title}}',
 
   "upload-allow-tags": [],
 };

@@ -19,6 +19,7 @@ import {
   pocketTagsToPocketTagList,
   SavedPocketItem,
 } from "../../pocket_api/PocketAPITypes";
+import { SettingsManager } from "src/SettingsManager"
 
 const styles = stylesheet`
   .item {
@@ -108,6 +109,7 @@ export type PocketItemProps = {
   tagNormalizer: TagNormalizationFn;
   createOrOpenItemNote: CreateOrOpenItemNoteFn;
   openSearchForTag: OpenSearchForTagFn;
+  settingsManager: SettingsManager;
 };
 
 enum PocketItemClickAction {
@@ -124,6 +126,7 @@ export const PocketItem = ({
   tagNormalizer,
   createOrOpenItemNote,
   openSearchForTag,
+  settingsManager,
 }: PocketItemProps) => {
   const [itemNoteExists, setItemNoteExists] = useState<boolean>(
     // item note exists initial state fetched in bulk for all items, to be
@@ -145,7 +148,7 @@ export const PocketItem = ({
     };
   }, [urlToPocketItemNoteIndex]);
 
-  const title = linkpathForSavedPocketItem(item);
+  const title = linkpathForSavedPocketItem(settingsManager.getSetting('item-note-filename-pattern'), item);
 
   const navigateToItemURL = () => {
     openBrowserWindow(item.resolved_url);

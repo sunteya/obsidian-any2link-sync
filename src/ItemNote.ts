@@ -50,10 +50,13 @@ export const displayTextForSavedPocketItem = (item: SavedPocketItem) => {
     : item.resolved_url;
 };
 const sanitizeTitle = (title: String) =>
-  title.replace(/[\\/:"*?<>|]+/g, " ").substring(0, MAXIMUM_TITLE_LENGTH);
+  title.replace(/[\\/:"*?<>|\[\]\^]+/g, " ").substring(0, MAXIMUM_TITLE_LENGTH);
 
-export const linkpathForSavedPocketItem = (item: SavedPocketItem) =>
-  sanitizeTitle(displayTextForSavedPocketItem(item));
+export const linkpathForSavedPocketItem = (pattern: string, item: SavedPocketItem) => {
+  return pattern
+    .replace("{{title}}", sanitizeTitle(displayTextForSavedPocketItem(item)))
+    .replace("{{item_id}}", item.item_id.toString());
+}
 
 export const getAllItemNotes =
   (
@@ -200,6 +203,15 @@ const transformStatus = (status:number) => {
 const normalizeExcerpt = (excerpt: String) =>
   `${excerpt.replace(/---./g, "")}`.replace(/\r?\n|\r/g, "\n    ");
 
+export const buildTagNormalizer = (settingsManager: SettingsManager, addHashtag: boolean) => {
+  const multiWordTagConversion = settingsManager.getSetting("multi-word-tag-converter")
+
+  return getTagNormalizer({
+    multiWordTagConversion: multiWordTagConversion,
+    addHashtag: addHashtag,
+  })
+}
+
 const generateInitialItemNoteContents = (
   templateContents: TemplateContents,
   pocketItem: SavedPocketItem,
@@ -207,16 +219,9 @@ const generateInitialItemNoteContents = (
 ): string => {
   type SubstitutionFn = (item: SavedPocketItem) => string;
 
-  const multiWordTagConversion = settingsManager.getSetting(
-    "multi-word-tag-converter"
-  )
-
   const hashtagSubstitutor = (addHashtag: boolean) => (tags: PocketTags) =>
     tagsToNoteContent(
-      getTagNormalizer({
-        multiWordTagConversion: multiWordTagConversion,
-        addHashtag: addHashtag,
-      }),
+      buildTagNormalizer(settingsManager, addHashtag),
       tags
     );
 
@@ -267,7 +272,7 @@ const findPathForNewPocketItem = (
   pocketItem: SavedPocketItem
 ) => {
   const itemNotesFolder = getItemNotesFolder(settingsManager);
-  const linkpath = linkpathForSavedPocketItem(pocketItem);
+  const linkpath = linkpathForSavedPocketItem(settingsManager.getSetting('item-note-filename-pattern'), pocketItem);
 
   const candidatePath = `${itemNotesFolder}/${linkpath}.md`;
   if (vault.getAbstractFileByPath(candidatePath) === null) {
@@ -373,6 +378,7 @@ export const createOrOpenItemNote =
         await openItemNote(workspace, newItemNote);
       } catch (err) {
         const errMsg = `Failed to create file for ${linkpathForSavedPocketItem(
+          settingsManager.getSetting('item-note-filename-pattern'),
           pocketItem
         )}`;
         log.error(errMsg, err);
@@ -441,6 +447,7 @@ export const bulkCreateItemNotes = async (
     } catch (err) {
       partialCreationNotice && partialCreationNotice.hide();
       const errMsg = `Failed to create file for ${linkpathForSavedPocketItem(
+        settingsManager.getSetting('item-note-filename-pattern'),
         pocketItem
       )}`;
       log.error(errMsg, err);

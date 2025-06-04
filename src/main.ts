@@ -10,6 +10,7 @@ import {
   URLToPocketItemNoteIndex,
 } from "./data/URLToPocketItemNoteIndex";
 import {
+  buildTagNormalizer,
   bulkCreateItemNotes,
   getAllItemNotes,
   resolveItemNote,
@@ -34,6 +35,7 @@ import {
 import { createReactApp } from "./ui/ReactApp";
 import { PocketSettingTab } from "./ui/settings";
 import { ViewManager } from "./ui/ViewManager";
+import { pocketTagsToPocketTagList } from "./pocket_api/PocketAPITypes"
 
 const URL_INDEXING_DELAY_MS = 1000;
 
@@ -94,7 +96,18 @@ export default class PocketSync extends Plugin {
 
     this.pendingBulkCreate = true;
 
-    const allPocketItems = await this.itemStore.getAllItems();
+    const allPocketItems = (await this.itemStore.getAllItems()).filter((item) => {
+      const ignoreTags = this.settingsManager.getSetting('item-note-ignore-tags')
+      if (ignoreTags.length == 0) {
+        return true
+      }
+
+      const pocketTags = pocketTagsToPocketTagList(item.tags)
+      const getTagNormalizer = buildTagNormalizer(this.settingsManager, false)
+      const tags = pocketTags.map(getTagNormalizer)
+      return !tags.some(it => ignoreTags.includes(it))
+    })
+
     const pocketItemsWithoutNotes = (
       await getAllItemNotes(
         this.urlToItemNoteIndex,

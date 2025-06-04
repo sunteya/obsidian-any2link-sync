@@ -129,6 +129,7 @@ export const PocketItemList = ({
                 })}
                 createOrOpenItemNote={createOrOpen}
                 openSearchForTag={openSearchForTag(plugin.app)}
+                settingsManager={settingsManager}
               />
             </li>
           );
