@@ -1,10 +1,10 @@
 {
-  "id": "obsidian-pocket",
-  "name": "Pocket",
-  "version": "0.8.1",
+  "id": "obsidian-any2link-sync",
+  "name": "Any2Link Sync",
+  "version": "0.9.0",
   "minAppVersion": "0.12.11",
-  "description": "Access your Pocket reading list entries and create notes for them easily",
-  "author": "Nimalan Mahendran",
-  "authorUrl": "https://twitter.com/nimalan",
+  "description": "Sync your links through any2.link service for easy note creation",
+  "author": "sunteya",
+  "authorUrl": "https://any2.link",
   "isDesktopOnly": false
 }

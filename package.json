@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-pocket-plugin",
+  "name": "obsidian-any2link-sync",
   "version": "0.8.1",
-  "description": "This is a plugin for Obsidian (https://obsidian.md) that allows for easy access to your Pocket (https://getpocket.com) list.",
+  "description": "This is a plugin for Obsidian (https://obsidian.md) that allows syncing your links through any2.link service.",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w --environment BUILD:dev",
